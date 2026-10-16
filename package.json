@@ -5,9 +5,16 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/database/migrate.js",
+    "test": "node test.js"
   },
-  "keywords": ["rest-api", "express", "sqlite", "jwt"],
+  "keywords": [
+    "rest-api",
+    "express",
+    "sqlite",
+    "jwt"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -18,6 +25,7 @@
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1"
   }
 }

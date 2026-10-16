@@ -1,4 +1,5 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 
 const express = require("express");
 const cors = require("cors");
@@ -10,12 +11,30 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Global Middleware ────────────────────────────────────────
-app.use(cors());
+const clientUrl = process.env.CLIENT_URL;
+app.use(
+  cors({
+    origin: clientUrl ? [clientUrl, "http://localhost:5173", "http://localhost:3000"] : true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-// ── Health Check ─────────────────────────────────────────────
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+// ── Root & Health Check Endpoints ─────────────────────────────
+app.get("/", (_req, res) => {
+  res.json({
+    message: "Task Manager REST API is running.",
+    health: "/api/health",
+    docs: "See README for endpoints",
+  });
+});
+
+app.get(["/health", "/api/health"], (_req, res) => {
+  res.json({
+    status: "ok",
+    database: process.env.DATABASE_URL ? "postgresql" : "sqlite",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ── Routes ───────────────────────────────────────────────────
@@ -34,11 +53,21 @@ app.use((err, _req, res, _next) => {
 });
 
 // ── Start Server ─────────────────────────────────────────────
-initialize();
+async function startServer() {
+  try {
+    await initialize();
+    app.listen(PORT, () => {
+      console.log(`\n  🚀 Task Manager API running on port ${PORT}`);
+      console.log(`  📋 Health check: http://localhost:${PORT}/api/health\n`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+}
 
-app.listen(PORT, () => {
-  console.log(`\n  🚀  Task Manager API running at http://localhost:${PORT}`);
-  console.log(`  📋  Health check: http://localhost:${PORT}/api/health\n`);
-});
+if (process.env.NODE_ENV !== "test") {
+  startServer();
+}
 
 module.exports = app;

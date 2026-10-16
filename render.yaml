@@ -1,0 +1,24 @@
+databases:
+  - name: taskmanager-db
+    databaseName: taskmanager
+    user: taskmanager_user
+    plan: free
+
+services:
+  - type: web
+    name: task-manager-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: taskmanager-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: NODE_ENV
+        value: production
